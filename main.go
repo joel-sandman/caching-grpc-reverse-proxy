@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	pb "github.com/llarsson/caching-grpc-reverse-proxy/hipstershop"
-	interceptors "github.com/llarsson/grpc-caching-interceptors/client"
+	pb "github.com/joel-sandman/caching-grpc-reverse-proxy/hipstershop"
+	interceptors "github.com/joel-sandman/grpc-caching-interceptors/client"
 	"github.com/patrickmn/go-cache"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
@@ -30,6 +30,11 @@ const (
 )
 
 func main() {
+	expiration, err := strconv.Atoi(os.Getenv("TTL"))
+	if err != nil {
+		log.Fatalf("TTL cannot be parsed as integer")
+	}
+
 	port, err := strconv.Atoi(os.Getenv("PROXY_LISTEN_PORT"))
 	if err != nil {
 		log.Fatalf("PROXY_LISTEN_PORT cannot be parsed as integer")
@@ -56,7 +61,7 @@ func main() {
 	}
 	defer csvFile.Close()
 
-	grpcServer := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}), grpc.UnaryInterceptor(cachingInterceptor.UnaryServerInterceptor(log.New(csvFile, "", 0))))
+	grpcServer := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}), grpc.UnaryInterceptor(cachingInterceptor.UnaryServerInterceptor(log.New(csvFile, "", 0), expiration)))
 
 	serviceAddrKeys := []string{productCatalogServiceAddrKey, currencyServiceAddrKey,
 		cartServiceAddrKey, recommendationServiceAddrKey, shippingServiceAddrKey,
