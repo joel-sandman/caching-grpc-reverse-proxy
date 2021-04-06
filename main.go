@@ -26,7 +26,8 @@ const (
 	adServiceAddrKey             = "AD_SERVICE_ADDR"
 	paymentSerivceAddrKey        = "PAYMENT_SERVICE_ADDR"
 	emailServiceAddrKey          = "EMAIL_SERVICE_ADDR"
-	csvFileName     = "data.csv"
+	csvFileName					 = "data.csv"
+	memoryUsageCsvFileName		 = "memory-data.csv"
 )
 
 func main() {
@@ -56,7 +57,13 @@ func main() {
 	cachingInterceptor := interceptors.InmemoryCachingInterceptor{Cache: *cache.New(10*time.Second, 60*time.Second)}
 
 	/* ------------------------- NEW CODE ------------------------- */
-	go cachingInterceptor.MemoryUsageStatus()
+	memoryUsageCsvFile, err := os.Create(memoryUsageCsvFileName)
+	if err != nil {
+		log.Fatalf("Could not open CSV file (%s) for writing", memoryUsageCsvFile)
+	}
+	defer memoryUsageCsvFile.Close()
+	
+	go cachingInterceptor.MemoryUsageStatus(log.New(memoryUsageCsvFile, "", 0))
 	/* ------------------------------------------------------------ */
 
 
