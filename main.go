@@ -41,6 +41,8 @@ func main() {
 		log.Fatalf("PROXY_LISTEN_PORT cannot be parsed as integer")
 	}
 
+	blacklistedExpressions := os.Getenv("PROXY_CACHE_BLACKLIST")
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -73,7 +75,7 @@ func main() {
 	}
 	defer csvFile.Close()
 
-	grpcServer := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}), grpc.UnaryInterceptor(cachingInterceptor.UnaryServerInterceptor(log.New(csvFile, "", 0), expiration)))
+	grpcServer := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}), grpc.UnaryInterceptor(cachingInterceptor.UnaryServerInterceptor(log.New(csvFile, "", 0), expiration, blacklistedExpressions)))
 
 	serviceAddrKeys := []string{productCatalogServiceAddrKey, currencyServiceAddrKey,
 		cartServiceAddrKey, recommendationServiceAddrKey, shippingServiceAddrKey,
