@@ -85,12 +85,6 @@ func (interceptor *InmemoryCachingInterceptor) UnaryServerInterceptor(csvLog *lo
 				return nil, err
 			}
 
-			// md, _ := metadata.FromIncomingContext(ctx)
-			// log.Printf("Metadata: %s", md)
-			log.Printf("Request: %s", req)
-			log.Printf("Request size: %d", proto.Size(reqMessage))
-			log.Printf("Response: %s", retResp)
-			log.Printf("Response size: %d", proto.Size(retResp.(proto.Message)))
 			responseSize := proto.Size(retResp.(proto.Message))
 			totalSize := requestSize + responseSize
 
@@ -107,6 +101,7 @@ func (interceptor *InmemoryCachingInterceptor) UnaryServerInterceptor(csvLog *lo
 			log.Printf("Using cached response for call to %s(%d)", info.FullMethod, requestHash)
 			csvLog.Printf("%d,cache,%s,%d,%s(%d)\n", time.Now().UnixNano(), match, totalSize, info.FullMethod, requestHash)
 			resp = value
+
 		// If request is not found in cache, cache it if it's not blacklisted.
 		} else {
 			retResp, err := handler(ctx, req)
@@ -126,7 +121,6 @@ func (interceptor *InmemoryCachingInterceptor) UnaryServerInterceptor(csvLog *lo
 				cacheStatus = fmt.Sprintf("response stored for %d ms", expiration)
 				csvLog.Printf("%d,downstream,,%d,%s(%d)\n", time.Now().UnixNano(), totalSize, info.FullMethod, requestHash)
 			}
-			// csvLog.Printf("%d,downstream,,%s(%d)\n", time.Now().UnixNano(), info.FullMethod, requestHash)
 			resp = retResp
 		}
 
@@ -190,7 +184,7 @@ func (interceptor *InmemoryCachingInterceptor) UnaryClientInterceptor() grpc.Una
 func (interceptor *InmemoryCachingInterceptor) MemoryUsageStatus(csvLog *log.Logger) {
 	csvLog.Printf("timestamp,items,bytes")
 	for {
-		time.Sleep(15 * time.Second)
+		time.Sleep(2 * time.Second)
 		interceptor.Cache.DeleteExpired()
 		items := interceptor.Cache.ItemCount()
 		log.Printf("Items in cache: %d", items)
