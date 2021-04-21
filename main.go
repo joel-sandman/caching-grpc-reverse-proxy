@@ -56,7 +56,7 @@ func main() {
 		log.Fatalf("Failed to register ocgrpc client views: %v", err)
 	}
 
-	cachingInterceptor := interceptors.InmemoryCachingInterceptor{Cache: *cache.New(10*time.Second, 60*time.Second)}
+	cachingInterceptor := interceptors.InmemoryCachingInterceptor{Cache: *cache.New(0*time.Second, 60*time.Second)}
 
 	/* ------------------------- NEW CODE ------------------------- */
 	memoryUsageCsvFile, err := os.Create(memoryUsageCsvFileName)
