@@ -58,7 +58,6 @@ func main() {
 
 	cachingInterceptor := interceptors.InmemoryCachingInterceptor{Cache: *cache.New(0*time.Second, 60*time.Second)}
 
-	/* ------------------------- NEW CODE ------------------------- */
 	memoryUsageCsvFile, err := os.Create(memoryUsageCsvFileName)
 	if err != nil {
 		log.Fatalf("Could not open CSV file (%s) for writing", memoryUsageCsvFile)
@@ -66,8 +65,6 @@ func main() {
 	defer memoryUsageCsvFile.Close()
 	
 	go cachingInterceptor.MemoryUsageStatus(log.New(memoryUsageCsvFile, "", 0))
-	/* ------------------------------------------------------------ */
-
 
 	csvFile, err := os.Create(csvFileName)
 	if err != nil {
